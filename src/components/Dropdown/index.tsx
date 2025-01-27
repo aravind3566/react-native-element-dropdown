@@ -5,9 +5,8 @@ import _findIndex from 'lodash/findIndex';
 import _get from 'lodash/get';
 import _isEqual from 'lodash/isEqual';
 
+import { debounce } from 'lodash';
 import React, {
-  JSXElementConstructor,
-  ReactElement,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -23,18 +22,18 @@ import {
   Keyboard,
   KeyboardEvent,
   Modal,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableHighlight,
   TouchableWithoutFeedback,
   View,
   ViewStyle,
-  StatusBar,
 } from 'react-native';
 import { useDetectDevice } from '../../toolkits';
 import { useDeviceOrientation } from '../../useDeviceOrientation';
 import CInput from '../TextInput';
-import { DropdownProps } from './model';
+import { DropdownProps, IDropdownRef } from './model';
 import { styles } from './styles';
 
 const { isTablet } = useDetectDevice;
@@ -42,10 +41,8 @@ const ic_down = require('../../assets/down.png');
 
 const statusBarHeight: number = StatusBar.currentHeight || 0;
 
-const DropdownComponent: <T>(
-  props: DropdownProps<T>
-) => ReactElement<any, string | JSXElementConstructor<any>> | null =
-  React.forwardRef((props, currentRef) => {
+const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
+  (props, currentRef) => {
     const orientation = useDeviceOrientation();
     const {
       testID,
@@ -173,7 +170,6 @@ const DropdownComponent: <T>(
         if (searchText.length > 0) {
           onSearch(searchText);
         }
-        scrollIndex();
       }
     };
 
@@ -276,9 +272,13 @@ const DropdownComponent: <T>(
       getValue();
     }, [value, data, getValue]);
 
-    const scrollIndex = useCallback(() => {
-      if (autoScroll && data?.length > 0 && listData?.length === data?.length) {
-        setTimeout(() => {
+    const scrollIndex = debounce(
+      useCallback(() => {
+        if (
+          autoScroll &&
+          data?.length > 0 &&
+          listData?.length === data?.length
+        ) {
           if (refList && refList?.current) {
             const defaultValue =
               typeof value === 'object' ? _get(value, valueField) : value;
@@ -301,9 +301,10 @@ const DropdownComponent: <T>(
               }
             }
           }
-        }, 200);
-      }
-    }, [autoScroll, data.length, listData, value, valueField]);
+        }
+      }, [autoScroll, data.length, listData, value, valueField]),
+      200
+    );
 
     const showOrClose = useCallback(() => {
       if (!disable) {
@@ -342,7 +343,6 @@ const DropdownComponent: <T>(
         if (searchText.length > 0) {
           onSearch(searchText);
         }
-        scrollIndex();
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
@@ -352,7 +352,6 @@ const DropdownComponent: <T>(
       _measure,
       data,
       searchText,
-      scrollIndex,
       onFocus,
       onBlur,
     ]);
@@ -632,6 +631,7 @@ const DropdownComponent: <T>(
               {...flatListProps}
               keyboardShouldPersistTaps="handled"
               ref={refList}
+              onContentSizeChange={scrollIndex}
               onScrollToIndexFailed={scrollIndex}
               data={listData}
               ListEmptyComponent={
@@ -790,6 +790,7 @@ const DropdownComponent: <T>(
         {_renderModal()}
       </View>
     );
-  });
+  }
+);
 
 export default DropdownComponent;
