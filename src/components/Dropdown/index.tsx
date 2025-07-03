@@ -196,7 +196,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       if (ref && ref?.current) {
         ref.current.measureInWindow((pageX, pageY, width, height) => {
           let isFull = isTablet
-            ? false
+            ? true
             : mode === 'modal' || orientation === 'LANDSCAPE';
 
           if (mode === 'auto') {
