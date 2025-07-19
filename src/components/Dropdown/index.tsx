@@ -30,13 +30,11 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { useDetectDevice } from '../../toolkits';
 import { useDeviceOrientation } from '../../useDeviceOrientation';
 import CInput from '../TextInput';
 import { DropdownProps, IDropdownRef } from './model';
 import { styles } from './styles';
 
-const { isTablet } = useDetectDevice;
 const ic_down = require('../../assets/down.png');
 
 const statusBarHeight: number = StatusBar.currentHeight || 0;
@@ -195,9 +193,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
     const _measure = useCallback(() => {
       if (ref && ref?.current) {
         ref.current.measureInWindow((pageX, pageY, width, height) => {
-          let isFull = isTablet
-            ? true
-            : mode === 'modal' || orientation === 'LANDSCAPE';
+          let isFull = mode === 'modal' || orientation === 'LANDSCAPE';
 
           if (mode === 'auto') {
             isFull = false;
